@@ -3,11 +3,17 @@
 use strict;
 use warnings;
 
+use Getopt::Long;
 use IO::Handle;
+
+Getopt::Long::Configure(qw(bundling no_getopt_compat));
 
 my $file   = shift;
 my $table  = lc(shift);
 my $column = lc(shift);
+my $ignore_if_null;
+
+GetOptions( 'ignore-if-null=s' => \$ignore_if_null );
 
 usage() unless (defined $file and defined $table and defined $column);
 usage() if ($file ne "-" and not -f $file);
@@ -16,6 +22,7 @@ my $in_copy = 0;
 my $handle  = IO::Handle->new();
 my $line;
 my $colnum;
+my $ignore_colnum;
 
 if ($file eq "-")
 {
@@ -41,7 +48,10 @@ while ($line = <$handle>)
 				if (lc($columns[$num]) eq $column)
 				{
 					$colnum = $num;
-					last;
+				}
+				elsif (lc($columns[$num]) eq lc($ignore_if_null))
+				{
+					$ignore_colnum = $num;
 				}
 			}
 		}
@@ -54,7 +64,7 @@ while ($line = <$handle>)
 	{
 		chomp($line);
 		my @row = split(/\t/, $line);
-		print $row[$colnum], "\n";
+		print $row[$colnum], "\n" unless (defined $ignore_colnum and $row[$ignore_colnum] eq '\\N');
 	}
 }
 close ($handle);
@@ -63,7 +73,12 @@ die "unable to find column '$column' in table '$table'" if (not defined $colnum)
 
 sub usage
 {
-	print "usage: $0 </path/to/postgresql/dumpfile> <tablename> <columnname>\n\n";
+	print <<END;
+usage: $0 [options] </path/to/postgresql/dumpfile> <tablename> <columnname>
+
+	--ignore-if-null=<colname>   ignore the row if the specified column is null
+
+END
 	exit 1;
 }
 
