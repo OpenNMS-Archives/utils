@@ -6,14 +6,14 @@ use warnings;
 use Getopt::Long;
 use IO::Handle;
 
+my $ignore_if_null;
+
 Getopt::Long::Configure(qw(bundling no_getopt_compat));
+GetOptions( 'ignore-if-null=s' => \$ignore_if_null );
 
 my $file   = shift;
 my $table  = lc(shift);
 my $column = lc(shift);
-my $ignore_if_null;
-
-GetOptions( 'ignore-if-null=s' => \$ignore_if_null );
 
 usage() unless (defined $file and defined $table and defined $column);
 usage() if ($file ne "-" and not -f $file);
