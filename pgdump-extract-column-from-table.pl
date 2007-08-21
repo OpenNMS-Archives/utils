@@ -31,6 +31,12 @@ if ($file eq "-")
 {
 	$handle->fdopen(fileno(STDIN), "r") or die "unable to open STDIN for reading: $!\n";
 }
+elsif ($file =~ /.gz/)
+{
+	my $filename = $file;
+	$filename =~ s/\'/\\\'/gs;
+	open ($handle, "gzip -dc '$filename' |") or die "unable to open $file for reading: $!\n";
+}
 else
 {
 	open ($handle, $file) or die "unable to open $file for reading: $!\n";
