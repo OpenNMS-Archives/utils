@@ -18,10 +18,11 @@ my $ifservices_mapping => {};
 my $foreignfile = shift;
 my $servicefile = shift;
 my $inputfile   = shift;
-my $dbname      = shift;
+my $dbname      = shift || 'opennms';
+my $dbhost      = shift || 'localhost';
 
 if (not defined $servicefile or not defined $inputfile or not -f $servicefile or not -f $inputfile or not defined $dbname) {
-	print "usage: $0 <foreignid_file> <servicefile> <input.sql> <database>\n\n";
+	print "usage: $0 <foreignid_file> <servicefile> <input.sql> [database] [database_host]\n\n";
 	exit 1;
 }
 
@@ -47,7 +48,7 @@ while (<FILEIN>)
 }
 close(FILEIN);
 
-my $dbh = DBI->connect('dbi:Pg:dbname=' . $dbname, 'postgres');
+my $dbh = DBI->connect('dbi:Pg:host=' . $dbhost . ';dbname=' . $dbname, 'postgres');
 my $select_nodeid = $dbh->prepare('SELECT nodeid FROM node WHERE foreignid=? AND foreignsource=?');
 my $select_ifserviceid = $dbh->prepare('SELECT id FROM ifservices WHERE nodeid=? AND ipaddr=? AND serviceid=?');
 

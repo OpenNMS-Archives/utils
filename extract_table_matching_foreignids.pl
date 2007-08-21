@@ -19,10 +19,11 @@ my $nodes_to_new_nodes = {};
 
 my $idfile    = shift;
 my $inputfile = shift;
-my $dbname    = shift;
+my $dbname    = shift || 'opennms';
+my $dbhost    = shift || 'localhost';
 
 if (not defined $idfile or not defined $inputfile or not -f $idfile or not -f $inputfile, or not defined $dbname) {
-	print "usage: $0 <idfile> <input.sql> <database>\n\n";
+	print "usage: $0 <idfile> <input.sql> [database] [database_host]\n\n";
 	exit 1;
 }
 
@@ -36,7 +37,7 @@ while (<FILEIN>)
 }
 close(FILEIN);
 
-my $dbh = DBI->connect('dbi:Pg:dbname=' . $dbname, 'postgres');
+my $dbh = DBI->connect('dbi:Pg:host=' . $dbhost . ';dbname=' . $dbname, 'postgres');
 my $select_nodeid = $dbh->prepare('SELECT nodeid FROM node WHERE foreignid=? AND foreignsource=?');
 
 # get the events and outages, and translate them
