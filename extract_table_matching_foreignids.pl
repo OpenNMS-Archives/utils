@@ -40,7 +40,14 @@ my $dbh = DBI->connect('dbi:Pg:dbname=' . $dbname, 'postgres');
 my $select_nodeid = $dbh->prepare('SELECT nodeid FROM node WHERE foreignid=? AND foreignsource=?');
 
 # get the events and outages, and translate them
-open (FILEIN, $inputfile) or die "can't read from sql file: $!\n";
+if ($inputfile =~ /.gz$/)
+{
+	open (FILEIN, "gzip -dc $inputfile |") or die "can't read from sql file: $!\n";
+}
+else
+{
+	open (FILEIN, $inputfile) or die "can't read from sql file: $!\n";
+}
 open (FILEOUT, '>translated-events.sql') or die "can't write to translated-events.sql: $!\n";
 
 while (my $line = <FILEIN>)
