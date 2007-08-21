@@ -40,7 +40,7 @@ my $select_nodeid = $dbh->prepare('SELECT nodeid FROM node WHERE foreignid=? AND
 
 # get the events and outages, and translate them
 open (FILEIN, $inputfile) or die "can't read from sql file: $!\n";
-open (FILEOUT, '>translated-events-and-outages.sql') or die "can't write to translated-events-and-outages.sql: $!\n";
+open (FILEOUT, '>translated-events.sql') or die "can't write to translated-events.sql: $!\n";
 
 while (my $line = <FILEIN>)
 {
@@ -49,7 +49,7 @@ while (my $line = <FILEIN>)
 		   $current_table = lc($1);
 		my @columns       = split(/\s*,\s*/, $2);
 
-		if ($current_table eq 'events' or $current_table eq 'outages')
+		if ($current_table eq 'events')
 		{
 			$in_copy = 1;
 			$columns = {};
