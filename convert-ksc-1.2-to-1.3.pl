@@ -29,23 +29,29 @@ my $ref = XMLin($fromfile);
 
 $ref->{'xmlns'} = 'http://xmlns.opennms.org/xsd/config/kscReports';
 
-for my $report (@{$ref->{'Report'}}) {
-	$report->{'graphs_per_line'} = 0;
-
-	for my $graph (@{$report->{'Graph'}}) {
-		my $nodeid      = $graph->{'nodeId'};
-		my $interfaceid = $graph->{'interfaceId'};
-		my $graphtype   = $graph->{'graphtype'};
-
-		my $type = $report_types->{$graphtype};
-
-		if ($type eq "nodeSnmp") {
-			$graph->{'resourceId'} = "node[$nodeid].nodeSnmp[]";
-		} else {
-			$graph->{'resourceId'} = "node[$nodeid].interfaceSnmp[$interfaceid]";
+if (exists $ref->{'Report'} and defined $ref->{'Report'}) {
+	for my $report (@{$ref->{'Report'}}) {
+		$report->{'graphs_per_line'} = 0;
+	
+		if (exists $report->{'Graph'} and defined $report->{'Graph'}) {
+			for my $graph (@{$report->{'Graph'}}) {
+				if (exists $graph->{'nodeId'} and exists $graph->{'interfaceId'} and exists $graph->{'graphtype'}) {
+					my $nodeid      = $graph->{'nodeId'};
+					my $interfaceid = $graph->{'interfaceId'};
+					my $graphtype   = $graph->{'graphtype'};
+			
+					my $type = $report_types->{$graphtype};
+			
+					if ($type eq "nodeSnmp") {
+						$graph->{'resourceId'} = "node[$nodeid].nodeSnmp[]";
+					} else {
+						$graph->{'resourceId'} = "node[$nodeid].interfaceSnmp[$interfaceid]";
+					}
+					delete $graph->{'nodeId'};
+					delete $graph->{'interfaceId'};
+				}
+			}
 		}
-		delete $graph->{'nodeId'};
-		delete $graph->{'interfaceId'};
 	}
 }
 
