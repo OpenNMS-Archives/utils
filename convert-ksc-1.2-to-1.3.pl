@@ -12,7 +12,7 @@ my $tofile               = shift;
 my $report_types = {};
 
 if (not defined $tofile) {
-	print "usage: $0 <snmp-graph.properties> <input_file> <output_file>\n";
+	print "usage: $0 <snmp-graph.properties> <input_file> [output_file]\n";
 	exit 1;
 }
 
@@ -25,7 +25,7 @@ while (my $line = <FILEIN>) {
 }
 close (FILEIN);
 
-my $ref = XMLin($fromfile);
+my $ref = XMLin($fromfile, ForceArray => 1);
 
 $ref->{'xmlns'} = 'http://xmlns.opennms.org/xsd/config/kscReports';
 
@@ -55,7 +55,12 @@ if (exists $ref->{'Report'} and defined $ref->{'Report'}) {
 	}
 }
 
-print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-print XMLout($ref,
-	RootName => 'ReportsList',
-);
+my $output = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" . XMLout($ref, RootName => 'ReportsList');
+
+if (defined $tofile) {
+	open (FILEOUT, '>' . $tofile) or die "unable to write to '$tofile': $!";
+	print FILEOUT $output;
+	close (FILEOUT);
+} else {
+	print $output;
+}
